@@ -17,15 +17,55 @@ interface Transcription {
   segments: Segment[];
 }
 
+const SUPPORTED_EXTENSIONS = [
+  ".flac",
+  ".mp3",
+  ".mp4",
+  ".mpeg",
+  ".mpga",
+  ".m4a",
+  ".ogg",
+  ".wav",
+  ".webm",
+];
+const MAX_FILE_SIZE_FREE = 25 * 1024 * 1024;
+const MAX_FILE_SIZE_DEV = 100 * 1024 * 1024;
+
+function isSupportedAudioFile(filename: string): boolean {
+  const ext = path.extname(filename).toLowerCase();
+  return SUPPORTED_EXTENSIONS.includes(ext);
+}
+
+function getFileSizeMB(filePath: string): number {
+  const stats = fs.statSync(filePath);
+  return stats.size / (1024 * 1024);
+}
+
 async function main() {
-  const files = fs.readdirSync(DATA_DIR).filter((f) => f.endsWith(".mp3"));
+  const files = fs.readdirSync(DATA_DIR).filter(isSupportedAudioFile);
   for (const file of files) {
-    await transcribeMp3(file);
+    await transcribeAudio(file);
   }
 }
 
-async function transcribeMp3(filename: string) {
-  const baseName = path.basename(filename, ".mp3");
+async function transcribeAudio(filename: string) {
+  const filePath = path.join(DATA_DIR, filename);
+  const fileSizeMB = getFileSizeMB(filePath);
+
+  if (fileSizeMB > MAX_FILE_SIZE_DEV) {
+    console.warn(
+      `Skipping ${filename}: ${fileSizeMB.toFixed(2)}MB exceeds max file size (${MAX_FILE_SIZE_DEV / (1024 * 1024)}MB for dev tier). Use URL parameter for larger files.`,
+    );
+    return;
+  }
+
+  if (fileSizeMB > MAX_FILE_SIZE_FREE) {
+    console.warn(
+      `Warning: ${filename} is ${fileSizeMB.toFixed(2)}MB. Free tier max is 25MB, dev tier max is 100MB.`,
+    );
+  }
+
+  const baseName = path.basename(filename, path.extname(filename));
   const jsonPath = path.join(DATA_DIR, `${baseName}.json`);
   const srtPath = path.join(DATA_DIR, `${baseName}.srt`);
   const txtPath = path.join(DATA_DIR, `${baseName}.txt`);
