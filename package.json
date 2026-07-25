@@ -6,5 +6,8 @@
   "scripts": {},
   "dependencies": {
     "groq-sdk": "^1.4.0"
+  },
+  "devDependencies": {
+    "@types/node": "^26.1.1"
   }
 }

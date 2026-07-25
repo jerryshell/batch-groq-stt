@@ -42,10 +42,27 @@ function getFileSizeMB(filePath: string): number {
 }
 
 async function main() {
+  if (!fs.existsSync(DATA_DIR)) {
+    fs.mkdirSync(DATA_DIR);
+    console.log(`Created directory: ${DATA_DIR}`);
+    console.log("Place audio files in the 'data' folder and run again.");
+    return;
+  }
+
   const files = fs.readdirSync(DATA_DIR).filter(isSupportedAudioFile);
+
+  if (files.length === 0) {
+    console.log(`No supported audio files found in '${DATA_DIR}' directory.`);
+    console.log(`Supported formats: ${SUPPORTED_EXTENSIONS.join(", ")}`);
+    return;
+  }
+
+  console.log(`Found ${files.length} audio file(s) to process.`);
   for (const file of files) {
     await transcribeAudio(file);
   }
+
+  console.log("Done.");
 }
 
 async function transcribeAudio(filename: string) {
