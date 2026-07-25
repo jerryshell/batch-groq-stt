@@ -36,7 +36,7 @@ bun install
 创建 `.env` 文件：
 
 ```bash
-GROQ_API_KEY="your_api_key_here"
+GROQ_API_KEY=your_api_key_here
 ```
 
 ## 下载音频
@@ -68,12 +68,3 @@ bun run index.ts
 | `audio.txt`  | 纯文本转录内容               |
 
 已存在的 JSON 文件会被跳过，不会重复转录。
-
-## 脚本
-
-```bash
-bun run lint      # 代码检查
-bun run lint:fix  # 自动修复
-bun run fmt       # 代码格式化
-bun run fmt:check # 检查格式
-```
